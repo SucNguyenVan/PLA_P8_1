@@ -2,6 +2,7 @@
 import { _decorator, Component, Node } from "cc";
 import { sp } from "cc";
 import { Plate } from "./Plate";
+import { Loading } from "./Loading";
 
 const { ccclass, property } = _decorator;
 
@@ -18,10 +19,10 @@ export class BreadOven extends Component {
   bread: Node | null = null;
 
   @property({ tooltip: "Giây từ lúc bắt đầu -> chín (Lv2)" })
-  cookedTime: number = 2.5;
+  cookedTime: number = 4;
 
   @property({ tooltip: "Giây thêm từ khi chín -> cháy (Lv3)" })
-  burntTime: number = 3;
+  burntTime: number = 4;
 
   @property({ type: Node, tooltip: "Đĩa 1" })
   plate1: Node | null = null;
@@ -29,20 +30,40 @@ export class BreadOven extends Component {
   @property({ type: Node, tooltip: "Đĩa 2" })
   plate2: Node | null = null;
 
+  @property({ type: Node, tooltip: "node loading" })
+  loadingFull: Node | null = null;
+
+  @property({ type: Node, tooltip: "node loading 2" })
+  loadingFull2: Node | null = null;
+
   // ---- State nội bộ
   private _status: FoodStatus = FoodStatus.Idle;
   private _runId = 0; // token vô hiệu hoá các callback đã schedule
 
   // =========================================================
   // Helpers
+  hiddenLoadingLv1() {
+    const loadingScript = this.loadingFull.getComponent(Loading);
+    if (loadingScript) {
+      loadingScript.hiddenLoading();
+    }
+  }
+
+  hiddenLoadingLv2() {
+    const loadingScript = this.loadingFull2.getComponent(Loading);
+    if (loadingScript) {
+      loadingScript.hiddenLoading();
+    }
+  }
+
   private getSkeleton(): sp.Skeleton | null {
     return this.bread?.getComponent(sp.Skeleton) ?? null;
   }
 
   /** Reset pose cứng để tránh "dính" slot/attachment từ anim trước */
   private hardResetPose(sk: sp.Skeleton) {
-    sk.clearTracks();           // dừng toàn bộ track
-    sk.setToSetupPose();        // hoặc sk.setSlotsToSetupPose();
+    sk.clearTracks(); // dừng toàn bộ track
+    sk.setToSetupPose(); // hoặc sk.setSlotsToSetupPose();
     // Nếu đang dùng Animation Cache Mode != REALTIME, hãy làm mới cache:
     (sk as any).invalidAnimationCache?.();
   }
@@ -58,7 +79,10 @@ export class BreadOven extends Component {
       const anim = s.data.findAnimation(name.trim());
       if (!anim) {
         const names = s.data.animations.map((a: any) => a.name);
-        console.warn(`[Spine] Animation not found: "${name}". Available:`, names);
+        console.warn(
+          `[Spine] Animation not found: "${name}". Available:`,
+          names
+        );
         return;
       }
       comp.clearTrack(0);
@@ -72,7 +96,7 @@ export class BreadOven extends Component {
     const sk = this.getSkeleton();
     if (!sk) return;
     this._status = status;
-    this.hardResetPose(sk);        // tránh dính khung/lag khi đổi anim
+    this.hardResetPose(sk); // tránh dính khung/lag khi đổi anim
     this.playSpineSafe(sk, status, loop);
   }
 
@@ -101,8 +125,15 @@ export class BreadOven extends Component {
       if (this._runId !== id) return;
       if (this._status !== FoodStatus.Lv1) return;
       this.setBreadStatus(FoodStatus.Lv2, true); // loop để giữ trạng thái cho tới khi cháy
+      const loadingScript2 = this.loadingFull2.getComponent(Loading);
+      if (loadingScript2) {
+        loadingScript2.playLoading(burnDelay);
+      }
     }, cookDelay);
-
+    const loadingScript = this.loadingFull.getComponent(Loading);
+    if (loadingScript) {
+      loadingScript.playLoading(cookDelay);
+    }
     // Lên Lv3 (cháy) sau tổng thời gian
     this.scheduleOnce(() => {
       if (this._runId !== id) return;
@@ -110,10 +141,10 @@ export class BreadOven extends Component {
       this.setBreadStatus(FoodStatus.Lv3, true);
     }, cookDelay + burnDelay);
   }
-
+ 
   /** Lấy bánh ra đĩa thành công -> reset về Idle và huỷ các lịch đang chờ */
   private resetToStart() {
-    this._runId++;                // vô hiệu các callback đã schedule
+    this._runId++; // vô hiệu các callback đã schedule
     this.unscheduleAllCallbacks();
     const sk = this.getSkeleton();
     if (sk) this.hardResetPose(sk);
@@ -129,6 +160,7 @@ export class BreadOven extends Component {
     if (p1 && !p1.getIsDisplayingFood()) {
       p1.displayFood();
       this.resetToStart();
+      this.hiddenLoadingLv2();
       return;
     }
 
@@ -136,6 +168,7 @@ export class BreadOven extends Component {
     if (p2 && !p2.getIsDisplayingFood()) {
       p2.displayFood();
       this.resetToStart();
+      this.hiddenLoadingLv2();
       return;
     }
   }
