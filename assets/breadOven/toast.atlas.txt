@@ -1,0 +1,76 @@
+
+toast.png
+size: 872,196
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+10
+  rotate: true
+  xy: 196, 96
+  size: 98, 143
+  orig: 98, 143
+  offset: 0, 0
+  index: -1
+11
+  rotate: true
+  xy: 341, 96
+  size: 98, 143
+  orig: 98, 143
+  offset: 0, 0
+  index: -1
+12
+  rotate: true
+  xy: 486, 96
+  size: 98, 143
+  orig: 98, 143
+  offset: 0, 0
+  index: -1
+2
+  rotate: true
+  xy: 196, 2
+  size: 92, 142
+  orig: 92, 142
+  offset: 0, 0
+  index: -1
+3
+  rotate: true
+  xy: 340, 2
+  size: 92, 142
+  orig: 92, 142
+  offset: 0, 0
+  index: -1
+4
+  rotate: true
+  xy: 484, 2
+  size: 92, 142
+  orig: 92, 142
+  offset: 0, 0
+  index: -1
+7
+  rotate: true
+  xy: 631, 102
+  size: 92, 143
+  orig: 92, 143
+  offset: 0, 0
+  index: -1
+8
+  rotate: false
+  xy: 776, 51
+  size: 92, 143
+  orig: 92, 143
+  offset: 0, 0
+  index: -1
+9
+  rotate: true
+  xy: 631, 8
+  size: 92, 143
+  orig: 92, 143
+  offset: 0, 0
+  index: -1
+smoke
+  rotate: false
+  xy: 2, 2
+  size: 192, 192
+  orig: 192, 192
+  offset: 0, 0
+  index: -1
