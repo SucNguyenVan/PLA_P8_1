@@ -20,7 +20,7 @@ export class CharactersController extends Component {
     };
     for (let character of this.charactersArr) {
       const response = character.fillItem(plateType);
-      if (response.isFilled) {
+      if (response?.isFilled) {
         result.isFilled = response.isFilled;
         break;
       }

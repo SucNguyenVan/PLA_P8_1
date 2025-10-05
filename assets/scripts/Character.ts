@@ -122,8 +122,9 @@ export class Character extends Component {
   }
 
   fillItem(plateType: PlateType) {
+    if (!this.isShowItem) return null;
     const itemsControllerScript = this.items.getComponent(ItemsController);
-    if (!itemsControllerScript) return;
+    if (!itemsControllerScript) return null;
     const result = itemsControllerScript.fillItemAction(plateType);
     return result;
   }

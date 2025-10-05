@@ -60,10 +60,19 @@ export class Plate extends Component {
     }
   }
 
+  resetPlate() {
+    this.food.active = false;
+    this.yellowSauce.active = false;
+    this.redSauce.active = false;
+  }
+
   onClick() {
     // quet character controller
     const charactersControllerScript =
       this.charactersController.getComponent(CharactersController);
-    charactersControllerScript.fillPlate(this.plateType);
+    const result = charactersControllerScript.fillPlate(this.plateType);
+    if (result?.isFilled) {
+      this.resetPlate();
+    }
   }
 }
