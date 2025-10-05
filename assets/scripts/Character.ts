@@ -1,5 +1,7 @@
 // assets/scripts/Character.ts
 import { _decorator, Component, Node, Vec3, sp } from "cc";
+import { PlateType } from "./Enum";
+import { ItemsController } from "./ItemsController";
 const { ccclass, property } = _decorator;
 
 @ccclass("Character")
@@ -25,11 +27,13 @@ export class Character extends Component {
   @property({ type: Node, tooltip: "Node chứa items" })
   items: Node | null = null;
 
+  isShowItem = false;
+
   private _tmp = new Vec3();
   private _arrived = false;
 
   start() {
-    this.items.active = false
+    this.items.active = false;
     if (this.destination) this.playAnim("move", true);
   }
 
@@ -63,7 +67,8 @@ export class Character extends Component {
       this.node.setWorldPosition(target);
       this._arrived = true;
       this.playAnim("idle_nor", true);
-      this.items.active = true
+      this.items.active = true;
+      this.isShowItem = true;
       return;
     }
 
@@ -114,5 +119,12 @@ export class Character extends Component {
     }
     this._arrived = false;
     this.playAnim("move", true);
+  }
+
+  fillItem(plateType: PlateType) {
+    const itemsControllerScript = this.items.getComponent(ItemsController);
+    if (!itemsControllerScript) return;
+    const result = itemsControllerScript.fillItemAction(plateType);
+    return result;
   }
 }

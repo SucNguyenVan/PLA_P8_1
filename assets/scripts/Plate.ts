@@ -1,12 +1,7 @@
 import { _decorator, Component, Node } from "cc";
+import { CharactersController } from "./CharactersController";
+import { PlateType } from "./Enum";
 const { ccclass, property } = _decorator;
-
-export enum PlateType {
-  Idle = 0,
-  OnlyFood = 1,
-  YellowSauce = 2,
-  RedSauce = 3
-}
 
 @ccclass("Plate")
 export class Plate extends Component {
@@ -28,33 +23,47 @@ export class Plate extends Component {
   })
   yellowSauce: Node;
 
-  plateType: PlateType = PlateType.Idle
+  @property({
+    type: Node,
+    tooltip: "node cho yellow sauce",
+  })
+  charactersController: Node;
+
+  plateType: PlateType = PlateType.Idle;
 
   start() {
     this.food.active = false;
-    this.redSauce.active = false
-    this.yellowSauce.active = false
+    this.redSauce.active = false;
+    this.yellowSauce.active = false;
+    this.node.on(Node.EventType.TOUCH_START, this.onClick, this);
   }
 
   update(deltaTime: number) {}
 
   displayFood() {
     this.food.active = true;
-    this.setPlateType(PlateType.OnlyFood)
+    this.setPlateType(PlateType.OnlyFood);
   }
 
   getIsDisplayingFood() {
     return this.food.active;
   }
 
-  setPlateType(type: PlateType){
-    this.plateType = type
-    this.redSauce.active = false
-    this.yellowSauce.active = false
-    if(type === PlateType.RedSauce){
-      this.redSauce.active = true
-    }else if(type === PlateType.YellowSauce){
-      this.yellowSauce.active = true
+  setPlateType(type: PlateType) {
+    this.plateType = type;
+    this.redSauce.active = false;
+    this.yellowSauce.active = false;
+    if (type === PlateType.RedSauce) {
+      this.redSauce.active = true;
+    } else if (type === PlateType.YellowSauce) {
+      this.yellowSauce.active = true;
     }
+  }
+
+  onClick() {
+    // quet character controller
+    const charactersControllerScript =
+      this.charactersController.getComponent(CharactersController);
+    charactersControllerScript.fillPlate(this.plateType);
   }
 }

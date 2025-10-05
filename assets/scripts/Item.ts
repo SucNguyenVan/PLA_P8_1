@@ -1,16 +1,16 @@
 import { _decorator, Component, Enum, Node } from "cc";
-import { PlateType } from "./Plate";
+import { PlateType, PlateTypeEnum } from "./Enum";
 const { ccclass, property } = _decorator;
 
 @ccclass("Item")
 export class Item extends Component {
   @property({
-    type: Enum(PlateType),
+    type: PlateTypeEnum,
     tooltip: "loại thức ăn",
   })
   itemType: PlateType;
 
-  isChecked = false
+  isChecked = false;
 
   @property({
     type: Node,
@@ -23,8 +23,8 @@ export class Item extends Component {
 
   update(deltaTime: number) {}
 
-  checkItem(){
-    this.isChecked = true
-    this.checkNode.active = true
+  checkItem() {
+    this.isChecked = true;
+    this.checkNode.active = true;
   }
 }
