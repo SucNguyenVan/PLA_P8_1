@@ -36,7 +36,6 @@ export class Sauce extends Component {
     if (!plate1Script) return;
     if (plate1Script.plateType === PlateType.OnlyFood) {
       plate1Script.setPlateType(this.sauceType);
-      console.log({ type: plate1Script.plateType });
     } else {
       const plate2Script = this.plate2.getComponent(Plate);
       if (!plate2Script) return;

@@ -9,36 +9,56 @@ export class Character extends Component {
   @property({ type: Node, tooltip: "Node chứa sp.Skeleton (Spine)" })
   body: Node | null = null;
 
-  @property({ type: Node, tooltip: "Điểm đến (Node)" })
+  @property({
+    type: Node,
+    tooltip:
+      "Điểm đến (Node) - chỉ dùng để xem trước trong Editor, KHÔNG tự di chuyển",
+  })
   destination: Node | null = null;
+
+  @property({ type: Node, tooltip: "Điểm đến (Node) khi complete task" })
+  destinationEnd: Node | null = null;
 
   @property({ tooltip: "Tốc độ di chuyển (đơn vị/giây)" })
   speed: number = 300;
 
   @property({ tooltip: "Khoảng cách coi như đã tới đích" })
-  stopDistance: number = 0; // bạn vẫn có thể để 0
+  stopDistance: number = 0;
 
-  @property({ tooltip: "Ngưỡng kỹ thuật chống kẹt do sai số (rất nhỏ)" })
+  @property({ tooltip: "Ngưỡng kỹ thuật chống kẹt do sai số" })
   arrivalEpsilon: number = 0.001;
 
   @property({ tooltip: "Tự lật ngang body theo hướng di chuyển" })
   autoFlipX: boolean = true;
 
-  @property({ type: Node, tooltip: "Node chứa items" })
+  @property({ type: Node, tooltip: "Node chứa items (ẩn/hiện khi tới đích)" })
   items: Node | null = null;
 
+  @property({ type: Number, tooltip: "Time delay trước khi nhân vật di chuyển" })
+  delayTime: number = 0;
+  // --- state ---
   isShowItem = false;
 
   private _tmp = new Vec3();
+  private _moving = false; // CHỈ di chuyển khi moveToNode() được gọi
   private _arrived = false;
+  private _arrivalResolver: (() => void) | null = null;
 
   start() {
-    this.items.active = false;
-    if (this.destination) this.playAnim("move", true);
+    // Không tự di chuyển khi vào game.
+    // Chỉ set trạng thái ban đầu.
+    if (this.items) this.items.active = false;
+    this.isShowItem = false;
+
+    // Đảm bảo anim idle ban đầu (nếu muốn)
+    this.playAnim("idle_nor", true);
+    this.scheduleOnce(()=>{
+      this.moveToNode(this.destination);
+    }, this.delayTime)
   }
 
   update(dt: number) {
-    if (!this.destination || this._arrived) return;
+    if (!this._moving || !this.destination) return;
 
     const cur = this.node.worldPosition;
     const target = this.destination.worldPosition;
@@ -52,9 +72,7 @@ export class Character extends Component {
 
     // Nếu đã đủ gần → snap & tới
     if (dist <= threshold) {
-      this.node.setWorldPosition(target);
-      this._arrived = true;
-      this.playAnim("idle_nor", true);
+      this._snapArrive(target);
       return;
     }
 
@@ -64,11 +82,7 @@ export class Character extends Component {
 
     // Nếu bước đi >= khoảng cách còn lại → snap ngay trong frame này
     if (step >= dist) {
-      this.node.setWorldPosition(target);
-      this._arrived = true;
-      this.playAnim("idle_nor", true);
-      this.items.active = true;
-      this.isShowItem = true;
+      this._snapArrive(target);
       return;
     }
 
@@ -93,11 +107,71 @@ export class Character extends Component {
     this.ensureMovingAnim();
   }
 
+  // -------- Public API --------
+
+  /**
+   * Bắt đầu di chuyển tới 1 Node mục tiêu.
+   * Trả về Promise được resolve khi nhân vật tới nơi.
+   */
+  public moveToNode(target: Node): Promise<void> {
+    this.node.setSiblingIndex(0)
+    this.destination = target;
+    this._arrived = false;
+    this._moving = true;
+    this.playAnim("move", true);
+
+    // hủy promise trước đó (nếu có) bằng cách ghi đè resolver
+    return new Promise<void>((resolve) => {
+      this._arrivalResolver = resolve;
+    });
+  }
+
+  /** Hủy di chuyển hiện tại (không đổi vị trí) */
+  public cancelMove() {
+    this._moving = false;
+    this._arrived = false;
+    // không resolve promise vì chưa tới nơi
+    this.ensureIdleAnim();
+  }
+
+  /**
+   * Đặt đích bằng toạ độ world rời rạc (nếu bạn cần)
+   * Lưu ý: KHÔNG tự chạy — chỉ set; muốn chạy, hãy dùng moveToNode với một Node holder của bạn.
+   */
+  public setDestinationWorld(pos: Vec3) {
+    const holder = new Node("TempDestination");
+    holder.setWorldPosition(pos);
+    this.destination = holder;
+    // vẫn không di chuyển cho tới khi bạn gọi this._moving = true từ một hàm riêng (không khuyến nghị)
+  }
+
+  /** Gọi khi tới nơi để fill item (giữ nguyên như bạn đang dùng) */
+  public fillItem(plateType: PlateType) {
+    if (!this.isShowItem || !this.items) return null;
+    const itemsControllerScript = this.items.getComponent(ItemsController);
+    if (!itemsControllerScript) return null;
+    const result = itemsControllerScript.fillItemAction(plateType);
+    console.log({ result });
+    if (result.isCompleteAllItems) {
+      this.scheduleOnce(() => {
+        this.items.active = false;
+        this.moveToNode(this.destinationEnd);
+      }, 1);
+    }
+    return result;
+  }
+
   // -------- Helpers --------
   private ensureMovingAnim() {
     const sk = this.body?.getComponent(sp.Skeleton);
     if (!sk) return;
     if (sk.animation !== "move") this.playAnim("move", true);
+  }
+
+  private ensureIdleAnim() {
+    const sk = this.body?.getComponent(sp.Skeleton);
+    if (!sk) return;
+    if (sk.animation !== "idle_nor") this.playAnim("idle_nor", true);
   }
 
   private playAnim(name: string, loop: boolean) {
@@ -109,23 +183,26 @@ export class Character extends Component {
     sk.setAnimation(0, name, loop);
   }
 
-  public setDestination(dest: Node | Vec3) {
-    if (dest instanceof Node) {
-      this.destination = dest;
-    } else {
-      const holder = new Node("TempDestination");
-      holder.setWorldPosition(dest);
-      this.destination = holder;
+  private _snapArrive(targetWorldPos: Vec3) {
+    this.node.setWorldPosition(targetWorldPos);
+    this._arrived = true;
+    this._moving = false;
+
+    // Hiển thị items khi đến nơi
+    if (this.items) this.items.active = true;
+    this.isShowItem = true;
+
+    this.playAnim("idle_nor", true);
+
+    // Resolve promise nếu đang chờ
+    if (this._arrivalResolver) {
+      this._arrivalResolver();
+      this._arrivalResolver = null;
     }
-    this._arrived = false;
-    this.playAnim("move", true);
   }
 
-  fillItem(plateType: PlateType) {
-    if (!this.isShowItem) return null;
-    const itemsControllerScript = this.items.getComponent(ItemsController);
-    if (!itemsControllerScript) return null;
-    const result = itemsControllerScript.fillItemAction(plateType);
-    return result;
+  onDisable() {
+    // nếu node bị tắt giữa chừng, kết thúc chuyển động và không resolve promise
+    this._moving = false;
   }
 }

@@ -61,6 +61,7 @@ export class Plate extends Component {
   }
 
   resetPlate() {
+    this.plateType = PlateType.Idle
     this.food.active = false;
     this.yellowSauce.active = false;
     this.redSauce.active = false;

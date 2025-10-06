@@ -12,19 +12,19 @@ export class Item extends Component {
 
   isChecked = false;
 
-  @property({
-    type: Node,
-    tooltip: "",
-  })
-  checkNode: Node;
+  // @property({
+  //   type: Node,
+  //   tooltip: "",
+  // })
+  // checkNode: Node;
   start() {
-    this.checkNode.active = false;
+    // this.checkNode.active = false;
   }
 
   update(deltaTime: number) {}
 
   checkItem() {
     this.isChecked = true;
-    this.checkNode.active = true;
+    // this.checkNode.active = true;
   }
 }

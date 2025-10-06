@@ -19,6 +19,7 @@ export class CharactersController extends Component {
       isFilled: false,
     };
     for (let character of this.charactersArr) {
+      console.log("name", character.name)
       const response = character.fillItem(plateType);
       if (response?.isFilled) {
         result.isFilled = response.isFilled;

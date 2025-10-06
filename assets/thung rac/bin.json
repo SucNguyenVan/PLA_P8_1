@@ -1,0 +1,48 @@
+{
+"skeleton": {
+	"hash": "DFkJq3IfuOW03gvRVlrENqZruHo",
+	"spine": "3.8.60",
+	"x": -132.98,
+	"y": -0.17,
+	"width": 298.46,
+	"height": 205.46,
+	"images": "./image/",
+	"audio": ""
+},
+"bones": [
+	{ "name": "root" },
+	{ "name": "thung-rac-1", "parent": "root", "length": 137.2, "rotation": 1.67, "x": -0.76, "y": 16.72 },
+	{ "name": "thung-rac-2", "parent": "root", "length": 110.71, "rotation": -112.71, "x": 8.07, "y": 176.84 }
+],
+"slots": [
+	{ "name": "thung-rac-1", "bone": "thung-rac-1", "attachment": "thung-rac-1" },
+	{ "name": "thung-rac-2", "bone": "thung-rac-2", "attachment": "thung-rac-2" }
+],
+"skins": [
+	{
+		"name": "default",
+		"attachments": {
+			"thung-rac-1": {
+				"thung-rac-1": { "x": 19.29, "y": 85.55, "rotation": -1.67, "width": 298, "height": 205 }
+			},
+			"thung-rac-2": {
+				"thung-rac-2": { "x": 65.48, "y": 36.53, "rotation": 112.71, "width": 298, "height": 205 },
+				"thung-rac-3": { "x": 64.77, "y": 36.81, "rotation": 112.71, "width": 298, "height": 205 }
+			}
+		}
+	}
+],
+"animations": {
+	"off": {},
+	"on": {
+		"slots": {
+			"thung-rac-2": {
+				"attachment": [
+					{ "name": "thung-rac-3" },
+					{ "time": 0.5, "name": "thung-rac-2" }
+				]
+			}
+		}
+	}
+}
+}

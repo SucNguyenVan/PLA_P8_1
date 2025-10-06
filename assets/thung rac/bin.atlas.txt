@@ -1,0 +1,27 @@
+
+bin.png
+size: 552,212
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+thung-rac-1
+  rotate: false
+  xy: 2, 2
+  size: 298, 205
+  orig: 298, 205
+  offset: 0, 0
+  index: -1
+thung-rac-2
+  rotate: true
+  xy: 302, 11
+  size: 196, 161
+  orig: 298, 205
+  offset: 23, 35
+  index: -1
+thung-rac-3
+  rotate: true
+  xy: 465, 16
+  size: 191, 84
+  orig: 298, 205
+  offset: 28, 110
+  index: -1
