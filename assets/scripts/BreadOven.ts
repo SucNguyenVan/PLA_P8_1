@@ -39,9 +39,20 @@ export class BreadOven extends Component {
   @property({ type: Node, tooltip: "node loading 2" })
   loadingFull2: Node | null = null;
 
+  @property({ type: Node, tooltip: "" })
+  handNode: Node | null = null;
+
+  isPressedFirst = false;
+
   // ---- State nội bộ
   private _status: FoodStatus = FoodStatus.Idle;
   private _runId = 0; // token vô hiệu hoá các callback đã schedule
+
+  protected start(): void {
+    if(this.handNode){
+      this.handNode.active = false
+    }
+  }
 
   // =========================================================
   // Helpers
@@ -105,7 +116,11 @@ export class BreadOven extends Component {
 
   /** Đang nấu = Lv1 hoặc Lv2 */
   public getIsCookingBread(): boolean {
-    return this._status === FoodStatus.Lv1 || this._status === FoodStatus.Lv2 || this._status === FoodStatus.Lv3;
+    return (
+      this._status === FoodStatus.Lv1 ||
+      this._status === FoodStatus.Lv2 ||
+      this._status === FoodStatus.Lv3
+    );
   }
 
   // =========================================================
@@ -127,6 +142,9 @@ export class BreadOven extends Component {
     this.scheduleOnce(() => {
       if (this._runId !== id) return;
       if (this._status !== FoodStatus.Lv1) return;
+      if(this.handNode && !this.isPressedFirst){
+        this.handNode.active = true
+      }
       this.setBreadStatus(FoodStatus.Lv2, true); // loop để giữ trạng thái cho tới khi cháy
       const loadingScript2 = this.loadingFull2.getComponent(Loading);
       if (loadingScript2) {
@@ -157,6 +175,9 @@ export class BreadOven extends Component {
   // =========================================================
   // Tương tác click: nếu đang Lv2 thì đặt lên plate1/plate2
   private onClickSelf() {
+    if(this.handNode?.active){
+      this.handNode.active = false
+    }
     if (this._status === FoodStatus.Lv2) {
       const p1 = this.plate1?.getComponent(Plate) ?? null;
       if (p1 && !p1.getIsDisplayingFood()) {
@@ -173,12 +194,12 @@ export class BreadOven extends Component {
         this.hiddenLoadingLv2();
         return;
       }
-    }else if(this._status === FoodStatus.Lv3){
-      const trashSkeleton = this.trash.getComponent(sp.Skeleton)
-      if(trashSkeleton){
-        this.hardResetPose(trashSkeleton)
-        this.playSpineSafe(trashSkeleton, "on", false)
-        this.resetToStart()
+    } else if (this._status === FoodStatus.Lv3) {
+      const trashSkeleton = this.trash.getComponent(sp.Skeleton);
+      if (trashSkeleton) {
+        this.hardResetPose(trashSkeleton);
+        this.playSpineSafe(trashSkeleton, "on", false);
+        this.resetToStart();
       }
     }
   }

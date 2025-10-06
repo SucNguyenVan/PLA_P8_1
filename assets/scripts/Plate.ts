@@ -29,6 +29,11 @@ export class Plate extends Component {
   })
   charactersController: Node;
 
+  @property({ type: Node, tooltip: "" })
+  handNode: Node | null = null;
+
+  isPressedFirst = false;
+
   plateType: PlateType = PlateType.Idle;
 
   start() {
@@ -36,6 +41,9 @@ export class Plate extends Component {
     this.redSauce.active = false;
     this.yellowSauce.active = false;
     this.node.on(Node.EventType.TOUCH_START, this.onClick, this);
+    if (this.handNode) {
+      this.handNode.active = false;
+    }
   }
 
   update(deltaTime: number) {}
@@ -50,6 +58,9 @@ export class Plate extends Component {
   }
 
   setPlateType(type: PlateType) {
+    if (this.handNode && !this.isPressedFirst) {
+      this.handNode.active = true;
+    }
     this.plateType = type;
     this.redSauce.active = false;
     this.yellowSauce.active = false;
@@ -61,13 +72,16 @@ export class Plate extends Component {
   }
 
   resetPlate() {
-    this.plateType = PlateType.Idle
+    this.plateType = PlateType.Idle;
     this.food.active = false;
     this.yellowSauce.active = false;
     this.redSauce.active = false;
   }
 
   onClick() {
+    if (this.handNode?.active) {
+      this.handNode.active = false;
+    }
     // quet character controller
     const charactersControllerScript =
       this.charactersController.getComponent(CharactersController);

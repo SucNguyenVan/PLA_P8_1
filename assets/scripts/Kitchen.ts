@@ -1,5 +1,6 @@
 import { _decorator, Component, Node, EventTouch } from "cc";
 import { BreadOven } from "./BreadOven";
+import { KitchenBread } from "./KitchenBread";
 const { ccclass, property } = _decorator;
 
 @ccclass("Kitchen")
@@ -24,6 +25,8 @@ export class Kitchen extends Component {
     tooltip: "node cho khay đựng bread",
   })
   breadFood: Node;
+
+  isPressedFirstBread = false
   onEnable() {
     this.initBreadFood();
   }
@@ -44,6 +47,13 @@ export class Kitchen extends Component {
       const isCookingBread2 = breadOven2Controller?.getIsCookingBread();
       if (!isCookingBread2) {
         breadOven2Controller?.spawnBread();
+      }
+    }
+    if(!this.isPressedFirstBread){
+      const kitchenBreadScript = this.breadFood.getComponent(KitchenBread)
+      if(kitchenBreadScript){
+        kitchenBreadScript.handNode.active = false
+        this.isPressedFirstBread = true
       }
     }
   }

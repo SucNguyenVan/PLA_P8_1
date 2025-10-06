@@ -1,14 +1,14 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node } from "cc";
 const { ccclass, property } = _decorator;
 
-@ccclass('KitchenBread')
+@ccclass("KitchenBread")
 export class KitchenBread extends Component {
-    start() {
+  @property({
+    type: Node,
+    tooltip: "hand node",
+  })
+  handNode: Node;
+  start() {}
 
-    }
-
-    update(deltaTime: number) {
-        
-    }
+  update(deltaTime: number) {}
 }
-
