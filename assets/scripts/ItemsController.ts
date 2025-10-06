@@ -37,7 +37,6 @@ export class ItemsController extends Component {
       }
     }
     result.isCompleteAllItems = !this.itemsArr.some((item) => !item.isChecked);
-    console.log("vao 1");
     if (result.isCompleteAllItems) {
       this.checkNode.active = true;
       this.node.children.forEach((item) => {

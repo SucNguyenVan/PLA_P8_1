@@ -35,7 +35,6 @@ export class Kitchen extends Component {
   }
 
   spawnBread() {
-    console.log("spawn bread");
     const breadOven1Controller = this.breadOven1.getComponent(BreadOven);
     const isCookingBread1 = breadOven1Controller?.getIsCookingBread();
     if (!isCookingBread1) {

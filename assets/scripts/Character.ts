@@ -39,6 +39,8 @@ export class Character extends Component {
   // --- state ---
   isShowItem = false;
 
+  isCompleteAllItems: boolean = false
+
   private _tmp = new Vec3();
   private _moving = false; // CHỈ di chuyển khi moveToNode() được gọi
   private _arrived = false;
@@ -151,12 +153,12 @@ export class Character extends Component {
     const itemsControllerScript = this.items.getComponent(ItemsController);
     if (!itemsControllerScript) return null;
     const result = itemsControllerScript.fillItemAction(plateType);
-    console.log({ result });
     if (result.isCompleteAllItems) {
+      this.isCompleteAllItems = true
       this.scheduleOnce(() => {
         this.items.active = false;
         this.moveToNode(this.destinationEnd);
-      }, 1);
+      }, 0.5);
     }
     return result;
   }

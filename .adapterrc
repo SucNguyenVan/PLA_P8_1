@@ -17,7 +17,7 @@
       "head": "<script>console.log('AppLovin')</script>"
     },
     "Unity": {
-      "body": "<script type='text/javascript' charset='utf-8' >var clickTag='',androidLink='https://play.google.com/store/apps/details?id=com.puzzle.fruit.rush',iosLink='https://apps.apple.com/us/app/fruit-rush-block-jam/id6746121263';var android='https://play.google.com/store/apps/details?id=com.puzzle.fruit.rush';if(/android/i.test(userAgent)){url=android}function showMyAd(){mraid.open(url)}</script>",
+      "body": "<script type='text/javascript' charset='utf-8' >var clickTag='',androidLink='https://play.google.com/store/apps/details?id=com.cscmobi.cookingmarina',iosLink='https://apps.apple.com/us/app/cooking-marina-cooking-games/id1488429989';var android='https://play.google.com/store/apps/details?id=com.cscmobi.cookingmarina';if(/android/i.test(userAgent)){url=android}function showMyAd(){mraid.open(url)}</script>",
       "sdkScript": "<script type='text/javascript' charset='utf-8'>(function () {cc.DebugMode = {};cc.DebugMode.INFO = 0;cc.DebugMode.ERROR = 1;})();</script>"
     }
   },
