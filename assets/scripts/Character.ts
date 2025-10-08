@@ -157,7 +157,10 @@ export class Character extends Component {
       this.isCompleteAllItems = true
       this.scheduleOnce(() => {
         this.items.active = false;
-        this.moveToNode(this.destinationEnd);
+        this.playAnim("happy", false)
+        this.scheduleOnce(()=>{
+          this.moveToNode(this.destinationEnd);
+        }, 1)
       }, 0.5);
     }
     return result;
@@ -173,7 +176,7 @@ export class Character extends Component {
   private ensureIdleAnim() {
     const sk = this.body?.getComponent(sp.Skeleton);
     if (!sk) return;
-    if (sk.animation !== "idle_nor") this.playAnim("idle_nor", true);
+    if (sk.animation !== "idle") this.playAnim("idle", true);
   }
 
   private playAnim(name: string, loop: boolean) {
