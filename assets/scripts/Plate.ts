@@ -1,6 +1,8 @@
 import { _decorator, Component, Node } from "cc";
 import { CharactersController } from "./CharactersController";
 import { PlateType } from "./Enum";
+import * as Sfx from "./Sfx"
+
 const { ccclass, property } = _decorator;
 
 @ccclass("Plate")
@@ -82,11 +84,13 @@ export class Plate extends Component {
     if (this.handNode?.active) {
       this.handNode.active = false;
     }
+    this.isPressedFirst = true
     // quet character controller
     const charactersControllerScript =
       this.charactersController.getComponent(CharactersController);
     const result = charactersControllerScript.fillPlate(this.plateType);
     if (result?.isFilled) {
+      Sfx.play()
       this.resetPlate();
     }
   }

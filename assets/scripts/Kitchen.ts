@@ -1,6 +1,7 @@
 import { _decorator, Component, Node, EventTouch } from "cc";
 import { BreadOven } from "./BreadOven";
 import { KitchenBread } from "./KitchenBread";
+import * as Sfx from "./Sfx"
 const { ccclass, property } = _decorator;
 
 @ccclass("Kitchen")
@@ -42,11 +43,13 @@ export class Kitchen extends Component {
     const isCookingBread1 = breadOven1Controller?.getIsCookingBread();
     if (!isCookingBread1) {
       breadOven1Controller.spawnBread();
+      Sfx.play()
     } else {
       const breadOven2Controller = this.breadOven2.getComponent(BreadOven);
       const isCookingBread2 = breadOven2Controller?.getIsCookingBread();
       if (!isCookingBread2) {
         breadOven2Controller?.spawnBread();
+        Sfx.play()
       }
     }
     if(!this.isPressedFirstBread){

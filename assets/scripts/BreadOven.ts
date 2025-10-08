@@ -3,6 +3,7 @@ import { _decorator, Component, Node } from "cc";
 import { sp } from "cc";
 import { Plate } from "./Plate";
 import { Loading } from "./Loading";
+import * as Sfx from "./Sfx"
 
 const { ccclass, property } = _decorator;
 
@@ -182,6 +183,7 @@ export class BreadOven extends Component {
       const p1 = this.plate1?.getComponent(Plate) ?? null;
       if (p1 && !p1.getIsDisplayingFood()) {
         p1.displayFood();
+        Sfx.play()
         this.resetToStart();
         this.hiddenLoadingLv2();
         return;
@@ -190,6 +192,7 @@ export class BreadOven extends Component {
       const p2 = this.plate2?.getComponent(Plate) ?? null;
       if (p2 && !p2.getIsDisplayingFood()) {
         p2.displayFood();
+        Sfx.play()
         this.resetToStart();
         this.hiddenLoadingLv2();
         return;
