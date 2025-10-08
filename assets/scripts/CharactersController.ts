@@ -22,12 +22,12 @@ export class CharactersController extends Component {
 
   update(deltaTime: number) {}
 
-  fillPlate(plateType: PlateType) {
+  async fillPlate(plateType: PlateType, foodNode: Node) {
     let result = {
       isFilled: false,
     };
     for (let character of this.charactersArr) {
-      const response = character.fillItem(plateType);
+      const response = await character.fillItem(plateType, foodNode);
       if (response?.isFilled) {
         result.isFilled = response.isFilled;
         if (response?.isCompleteAllItems) {

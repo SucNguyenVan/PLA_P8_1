@@ -148,11 +148,11 @@ export class Character extends Component {
   }
 
   /** Gọi khi tới nơi để fill item (giữ nguyên như bạn đang dùng) */
-  public fillItem(plateType: PlateType) {
+  async fillItem(plateType: PlateType, foodNode: Node) {
     if (!this.isShowItem || !this.items) return null;
     const itemsControllerScript = this.items.getComponent(ItemsController);
     if (!itemsControllerScript) return null;
-    const result = itemsControllerScript.fillItemAction(plateType);
+    const result = await itemsControllerScript.fillItemAction(plateType, foodNode);
     if (result.isCompleteAllItems) {
       this.isCompleteAllItems = true
       this.scheduleOnce(() => {

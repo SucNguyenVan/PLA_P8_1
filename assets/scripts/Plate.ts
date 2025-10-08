@@ -31,6 +31,12 @@ export class Plate extends Component {
   })
   charactersController: Node;
 
+    @property({
+    type: Node,
+    tooltip: "",
+  })
+  foodNode: Node;
+
   @property({ type: Node, tooltip: "" })
   handNode: Node | null = null;
 
@@ -80,7 +86,7 @@ export class Plate extends Component {
     this.redSauce.active = false;
   }
 
-  onClick() {
+  async onClick() {
     if (this.handNode?.active) {
       this.handNode.active = false;
     }
@@ -88,7 +94,7 @@ export class Plate extends Component {
     // quet character controller
     const charactersControllerScript =
       this.charactersController.getComponent(CharactersController);
-    const result = charactersControllerScript.fillPlate(this.plateType);
+    const result = await charactersControllerScript.fillPlate(this.plateType, this.foodNode);
     if (result?.isFilled) {
       Sfx.play()
       this.resetPlate();
