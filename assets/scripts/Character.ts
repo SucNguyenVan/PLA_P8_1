@@ -1,5 +1,13 @@
 // assets/scripts/Character.ts
-import { _decorator, Component, Node, Vec3, sp } from "cc";
+import {
+  _decorator,
+  Component,
+  Node,
+  Vec3,
+  sp,
+  AudioSource,
+  AudioClip,
+} from "cc";
 import { PlateType } from "./Enum";
 import { ItemsController } from "./ItemsController";
 const { ccclass, property } = _decorator;
@@ -34,12 +42,35 @@ export class Character extends Component {
   @property({ type: Node, tooltip: "Node chứa items (ẩn/hiện khi tới đích)" })
   items: Node | null = null;
 
-  @property({ type: Number, tooltip: "Time delay trước khi nhân vật di chuyển" })
+  @property({
+    type: Number,
+    tooltip: "Time delay trước khi nhân vật di chuyển",
+  })
   delayTime: number = 0;
+
+  // ====== ÂM THANH ======
+  @property({
+    type: AudioSource,
+    tooltip: "AudioSource để phát SFX (gắn trên Character hoặc node con)",
+  })
+  audio: AudioSource | null = null;
+
+  @property({ type: AudioClip, tooltip: "Âm chào (hello)" })
+  helloClip: AudioClip | null = null;
+
+  @property({ type: AudioClip, tooltip: "Âm chiến thắng (victory)" })
+  victoryClip: AudioClip | null = null;
+
+  @property({ tooltip: "Âm lượng khi playOneShot (0..1)" })
+  sfxVolume: number = 1.0;
+
+  isSaidHello = false
+
+  isSailHappy = false
+
   // --- state ---
   isShowItem = false;
-
-  isCompleteAllItems: boolean = false
+  isCompleteAllItems: boolean = false;
 
   private _tmp = new Vec3();
   private _moving = false; // CHỈ di chuyển khi moveToNode() được gọi
@@ -48,16 +79,20 @@ export class Character extends Component {
 
   start() {
     // Không tự di chuyển khi vào game.
-    // Chỉ set trạng thái ban đầu.
     if (this.items) this.items.active = false;
     this.isShowItem = false;
 
-    // Đảm bảo anim idle ban đầu (nếu muốn)
+    // Anim idle ban đầu
     this.playAnim("idle_nor", true);
-    this.scheduleOnce(()=>{
-      this.moveToNode(this.destination);
-    }, this.delayTime)
-    this.onSetTimeOutCallback()
+
+    // Nếu muốn trễ rồi mới di chuyển thì giữ schedule này; nếu không, bỏ.
+    this.scheduleOnce(() => {
+      if (this.destination) {
+        this.moveToNode(this.destination);
+      }
+    }, this.delayTime);
+
+    this.onSetTimeOutCallback();
   }
 
   update(dt: number) {
@@ -112,18 +147,15 @@ export class Character extends Component {
 
   // -------- Public API --------
 
-  /**
-   * Bắt đầu di chuyển tới 1 Node mục tiêu.
-   * Trả về Promise được resolve khi nhân vật tới nơi.
-   */
-  public moveToNode(target: Node): Promise<void> {
-    this.node.setSiblingIndex(0)
+  /** Bắt đầu di chuyển tới 1 Node mục tiêu. Trả về Promise được resolve khi nhân vật tới nơi. */
+  public moveToNode(target: Node | null): Promise<void> {
+    this.node.setSiblingIndex(0);
+    if (!target) return Promise.resolve();
     this.destination = target;
     this._arrived = false;
     this._moving = true;
     this.playAnim("move", true);
 
-    // hủy promise trước đó (nếu có) bằng cách ghi đè resolver
     return new Promise<void>((resolve) => {
       this._arrivalResolver = resolve;
     });
@@ -133,38 +165,62 @@ export class Character extends Component {
   public cancelMove() {
     this._moving = false;
     this._arrived = false;
-    // không resolve promise vì chưa tới nơi
     this.ensureIdleAnim();
   }
 
-  /**
-   * Đặt đích bằng toạ độ world rời rạc (nếu bạn cần)
-   * Lưu ý: KHÔNG tự chạy — chỉ set; muốn chạy, hãy dùng moveToNode với một Node holder của bạn.
-   */
+  /** Đặt đích bằng toạ độ world rời rạc (nếu bạn cần) */
   public setDestinationWorld(pos: Vec3) {
     const holder = new Node("TempDestination");
     holder.setWorldPosition(pos);
     this.destination = holder;
-    // vẫn không di chuyển cho tới khi bạn gọi this._moving = true từ một hàm riêng (không khuyến nghị)
   }
 
-  /** Gọi khi tới nơi để fill item (giữ nguyên như bạn đang dùng) */
+  /** Gọi khi tới nơi để fill item */
   async fillItem(plateType: PlateType, foodNode: Node) {
     if (!this.isShowItem || !this.items) return null;
     const itemsControllerScript = this.items.getComponent(ItemsController);
     if (!itemsControllerScript) return null;
-    const result = await itemsControllerScript.fillItemAction(plateType, foodNode);
+    const result = await itemsControllerScript.fillItemAction(
+      plateType,
+      foodNode
+    );
     if (result.isCompleteAllItems) {
-      this.isCompleteAllItems = true
+      this.isCompleteAllItems = true;
       this.scheduleOnce(() => {
-        this.items.active = false;
-        this.playAnim("happy", false)
-        this.scheduleOnce(()=>{
-          this.moveToNode(this.destinationEnd);
-        }, 1)
+        if (this.items) this.items.active = false;
+        this.playAnim("happy", false);
+        this.playVictory();
+        this.scheduleOnce( async () => {
+          if (this.destinationEnd) {
+            await this.moveToNode(this.destinationEnd)
+            this.node.destroy()
+          };
+        }, 1);
       }, 0.5);
     }
     return result;
+  }
+
+  // ====== SFX API ======
+
+  /** Phát âm "hello" (one-shot). Gọi khi bạn cần. */
+  public playHello() {
+    if (this.audio && this.helloClip && !this.isSaidHello) {
+      this.audio.playOneShot(this.helloClip, this.sfxVolume);
+      this.isSaidHello = true
+    } else {
+      console.warn("[Character] Chưa gán AudioSource hoặc helloClip.");
+    }
+  }
+
+  /** Phát âm "victory" (one-shot). Gọi khi bạn cần. */
+  public playVictory() {
+    if (this.audio && this.victoryClip && !this.isSailHappy) {
+      this.audio.playOneShot(this.victoryClip, this.sfxVolume);
+      this.isSailHappy = true
+    } else {
+      console.warn("[Character] Chưa gán AudioSource hoặc victoryClip.");
+    }
   }
 
   // -------- Helpers --------
@@ -195,17 +251,17 @@ export class Character extends Component {
     this._moving = false;
 
     // Hiển thị items khi đến nơi
-    if (this.items){
+    if (this.items) {
       this.items.active = true;
       const itemsControllerScript = this.items.getComponent(ItemsController);
-      if(itemsControllerScript){
-        itemsControllerScript.startTimeBar()
+      if (itemsControllerScript) {
+        itemsControllerScript.startTimeBar();
       }
     }
     this.isShowItem = true;
 
     this.playAnim("idle_nor", true);
-
+    this.playHello();
     // Resolve promise nếu đang chờ
     if (this._arrivalResolver) {
       this._arrivalResolver();
@@ -218,12 +274,12 @@ export class Character extends Component {
     this._moving = false;
   }
 
-  onSetTimeOutCallback(){
-    const itemsControllerScript = this.items.getComponent(ItemsController);
-      if(itemsControllerScript){
-        itemsControllerScript.setTimeOutCallback(()=>{
-          this.playAnim("frustrating", true)
-        })
-      }
+  onSetTimeOutCallback() {
+    const itemsControllerScript = this.items?.getComponent(ItemsController);
+    if (itemsControllerScript) {
+      itemsControllerScript.setTimeOutCallback(() => {
+        this.playAnim("frustrating", true);
+      });
+    }
   }
 }

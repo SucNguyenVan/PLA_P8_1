@@ -6,7 +6,7 @@ const { ccclass, property } = _decorator;
 @ccclass('HandTapPressLoop')
 export class HandTapPressLoop extends Component {
   @property({ tooltip: 'Khoảng dịch khi nhấn (px, hướng Y-)' })
-  distance = 10;
+  distance = 18;
 
   @property({ tooltip: 'Thời gian đi xuống (s)' })
   downDuration = 0.08;
