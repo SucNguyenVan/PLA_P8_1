@@ -2,6 +2,7 @@ import { _decorator, Component, Node } from "cc";
 import { Item } from "./Item";
 import { PlateType } from "./Enum";
 import { flyToAndHideReset } from "./FlyTo";
+import { TripleHealthBar } from "./TripleHealthBar";
 
 const { ccclass, property } = _decorator;
 
@@ -19,6 +20,12 @@ export class ItemsController extends Component {
   })
   checkNode: Node;
 
+  @property({
+    type: Node,
+    tooltip: "",
+  })
+  timeBar: Node;
+
   start() {
     this.checkNode.active = false;
   }
@@ -33,7 +40,7 @@ export class ItemsController extends Component {
     for (let item of this.itemsArr) {
       if (!item.isChecked && item.itemType === plateType) {
         item.checkItem();
-        await flyToAndHideReset(foodNode, item.node)
+        await flyToAndHideReset(foodNode, item.node);
         item.node.active = false;
         result.isFilled = true;
       }
@@ -48,5 +55,12 @@ export class ItemsController extends Component {
       });
     }
     return result;
+  }
+
+  startTimeBar(){
+    const TripleHealthBarScript = this.timeBar.getComponent(TripleHealthBar)
+    if(TripleHealthBarScript){
+      TripleHealthBarScript.startCountdown()
+    }
   }
 }

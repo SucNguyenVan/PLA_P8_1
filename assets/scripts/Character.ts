@@ -194,7 +194,13 @@ export class Character extends Component {
     this._moving = false;
 
     // Hiển thị items khi đến nơi
-    if (this.items) this.items.active = true;
+    if (this.items){
+      this.items.active = true;
+      const itemsControllerScript = this.items.getComponent(ItemsController);
+      if(itemsControllerScript){
+        itemsControllerScript.startTimeBar()
+      }
+    }
     this.isShowItem = true;
 
     this.playAnim("idle_nor", true);
