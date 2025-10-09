@@ -1,7 +1,7 @@
 import { _decorator, Component, Node } from "cc";
 import { CharactersController } from "./CharactersController";
 import { PlateType } from "./Enum";
-import * as Sfx from "./Sfx"
+import * as Sfx from "./Sfx";
 
 const { ccclass, property } = _decorator;
 
@@ -31,7 +31,7 @@ export class Plate extends Component {
   })
   charactersController: Node;
 
-    @property({
+  @property({
     type: Node,
     tooltip: "",
   })
@@ -39,6 +39,12 @@ export class Plate extends Component {
 
   @property({ type: Node, tooltip: "" })
   handNode: Node | null = null;
+
+  @property({
+    type: Boolean,
+    tooltip: "",
+  })
+  isFirstPlate = false;
 
   isPressedFirst = false;
 
@@ -66,7 +72,7 @@ export class Plate extends Component {
   }
 
   setPlateType(type: PlateType) {
-    if (this.handNode && !this.isPressedFirst) {
+    if (this.handNode && !this.isPressedFirst && this.isFirstPlate) {
       this.handNode.active = true;
     }
     this.plateType = type;
@@ -90,13 +96,16 @@ export class Plate extends Component {
     if (this.handNode?.active) {
       this.handNode.active = false;
     }
-    this.isPressedFirst = true
+    this.isPressedFirst = true;
     // quet character controller
     const charactersControllerScript =
       this.charactersController.getComponent(CharactersController);
-    const result = await charactersControllerScript.fillPlate(this.plateType, this.foodNode);
+    const result = await charactersControllerScript.fillPlate(
+      this.plateType,
+      this.foodNode
+    );
     if (result?.isFilled) {
-      Sfx.play()
+      Sfx.play();
       this.resetPlate();
     }
   }
