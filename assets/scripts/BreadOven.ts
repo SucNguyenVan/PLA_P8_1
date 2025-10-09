@@ -3,7 +3,7 @@ import { _decorator, Component, Node } from "cc";
 import { sp } from "cc";
 import { Plate } from "./Plate";
 import { Loading } from "./Loading";
-import * as Sfx from "./Sfx"
+import * as Sfx from "./Sfx";
 
 const { ccclass, property } = _decorator;
 
@@ -31,16 +31,22 @@ export class BreadOven extends Component {
   @property({ type: Node, tooltip: "Đĩa 2" })
   plate2: Node | null = null;
 
-  @property({ type: Node, tooltip: "Thung rac" })
+  @property({ type: Node, tooltip: "Đĩa 3" })
+  plate3: Node | null = null;
+
+  @property({ type: Node, tooltip: "Đĩa 4" })
+  plate4: Node | null = null;
+
+  @property({ type: Node, tooltip: "Thùng rác" })
   trash: Node | null = null;
 
-  @property({ type: Node, tooltip: "node loading" })
+  @property({ type: Node, tooltip: "node loading Lv1" })
   loadingFull: Node | null = null;
 
-  @property({ type: Node, tooltip: "node loading 2" })
+  @property({ type: Node, tooltip: "node loading Lv2" })
   loadingFull2: Node | null = null;
 
-  @property({ type: Node, tooltip: "" })
+  @property({ type: Node, tooltip: "Tay hướng dẫn" })
   handNode: Node | null = null;
 
   isPressedFirst = false;
@@ -50,25 +56,20 @@ export class BreadOven extends Component {
   private _runId = 0; // token vô hiệu hoá các callback đã schedule
 
   protected start(): void {
-    if(this.handNode){
-      this.handNode.active = false
+    if (this.handNode) {
+      this.handNode.active = false;
     }
   }
 
-  // =========================================================
   // Helpers
   hiddenLoadingLv1() {
-    const loadingScript = this.loadingFull.getComponent(Loading);
-    if (loadingScript) {
-      loadingScript.hiddenLoading();
-    }
+    const loadingScript = this.loadingFull?.getComponent(Loading);
+    loadingScript?.hiddenLoading();
   }
 
   hiddenLoadingLv2() {
-    const loadingScript = this.loadingFull2.getComponent(Loading);
-    if (loadingScript) {
-      loadingScript.hiddenLoading();
-    }
+    const loadingScript = this.loadingFull2?.getComponent(Loading);
+    loadingScript?.hiddenLoading();
   }
 
   private getSkeleton(): sp.Skeleton | null {
@@ -94,10 +95,7 @@ export class BreadOven extends Component {
       const anim = s.data.findAnimation(name.trim());
       if (!anim) {
         const names = s.data.animations.map((a: any) => a.name);
-        console.warn(
-          `[Spine] Animation not found: "${name}". Available:`,
-          names
-        );
+        console.warn(`[Spine] Animation not found: "${name}". Available:`, names);
         return;
       }
       comp.clearTrack(0);
@@ -115,7 +113,7 @@ export class BreadOven extends Component {
     this.playSpineSafe(sk, status, loop);
   }
 
-  /** Đang nấu = Lv1 hoặc Lv2 */
+  /** Đang nấu = Lv1 hoặc Lv2 hoặc Lv3 (cháy) */
   public getIsCookingBread(): boolean {
     return (
       this._status === FoodStatus.Lv1 ||
@@ -124,8 +122,6 @@ export class BreadOven extends Component {
     );
   }
 
-  // =========================================================
-  // Flow chính
   /** Bắt đầu nướng: Lv1 ngay, Lv2 sau cookedTime, Lv3 sau cookedTime + burntTime */
   public spawnBread() {
     // Vô hiệu mọi callback cũ và huỷ lịch
@@ -143,19 +139,17 @@ export class BreadOven extends Component {
     this.scheduleOnce(() => {
       if (this._runId !== id) return;
       if (this._status !== FoodStatus.Lv1) return;
-      if(this.handNode && !this.isPressedFirst){
-        this.handNode.active = true
+      if (this.handNode && !this.isPressedFirst) {
+        this.handNode.active = true;
       }
       this.setBreadStatus(FoodStatus.Lv2, true); // loop để giữ trạng thái cho tới khi cháy
-      const loadingScript2 = this.loadingFull2.getComponent(Loading);
-      if (loadingScript2) {
-        loadingScript2.playLoading(burnDelay);
-      }
+      const loadingScript2 = this.loadingFull2?.getComponent(Loading);
+      loadingScript2?.playLoading(burnDelay);
     }, cookDelay);
-    const loadingScript = this.loadingFull.getComponent(Loading);
-    if (loadingScript) {
-      loadingScript.playLoading(cookDelay);
-    }
+
+    const loadingScript = this.loadingFull?.getComponent(Loading);
+    loadingScript?.playLoading(cookDelay);
+
     // Lên Lv3 (cháy) sau tổng thời gian
     this.scheduleOnce(() => {
       if (this._runId !== id) return;
@@ -173,32 +167,29 @@ export class BreadOven extends Component {
     this.setBreadStatus(FoodStatus.Idle, false);
   }
 
-  // =========================================================
-  // Tương tác click: nếu đang Lv2 thì đặt lên plate1/plate2
+  // Tương tác click: nếu đang Lv2 thì đặt lên plate1/2/3/4
   private onClickSelf() {
-    if(this.handNode?.active){
-      this.handNode.active = false
+    if (this.handNode?.active) {
+      this.handNode.active = false;
     }
-    if (this._status === FoodStatus.Lv2) {
-      const p1 = this.plate1?.getComponent(Plate) ?? null;
-      if (p1 && !p1.getIsDisplayingFood()) {
-        p1.displayFood();
-        Sfx.play()
-        this.resetToStart();
-        this.hiddenLoadingLv2();
-        return;
-      }
 
-      const p2 = this.plate2?.getComponent(Plate) ?? null;
-      if (p2 && !p2.getIsDisplayingFood()) {
-        p2.displayFood();
-        Sfx.play()
-        this.resetToStart();
-        this.hiddenLoadingLv2();
-        return;
+    if (this._status === FoodStatus.Lv2) {
+      // Thứ tự ưu tiên: 1 → 2 → 3 → 4
+      const candidates: (Node | null)[] = [this.plate1, this.plate2, this.plate3, this.plate4];
+
+      for (const pNode of candidates) {
+        const p = pNode?.getComponent(Plate) ?? null;
+        if (p && !p.getIsDisplayingFood()) {
+          p.displayFood();
+          Sfx.play();
+          this.resetToStart();
+          this.hiddenLoadingLv2();
+          return;
+        }
       }
+      // nếu không có đĩa trống nào -> không làm gì
     } else if (this._status === FoodStatus.Lv3) {
-      const trashSkeleton = this.trash.getComponent(sp.Skeleton);
+      const trashSkeleton = this.trash?.getComponent(sp.Skeleton) ?? null;
       if (trashSkeleton) {
         this.hardResetPose(trashSkeleton);
         this.playSpineSafe(trashSkeleton, "on", false);
@@ -207,8 +198,7 @@ export class BreadOven extends Component {
     }
   }
 
-  // =========================================================
-  // Lifecycle – gắn/tháo listener đúng vòng đời
+
   protected onEnable(): void {
     this.node.on(Node.EventType.TOUCH_START, this.onClickSelf, this);
   }
