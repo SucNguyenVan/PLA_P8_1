@@ -95,7 +95,7 @@ export class Kitchen extends Component {
       }
     }
 
-    if (spawned && !this.isPressedFirstBread) {
+    if (spawned) {
       const kitchenBreadScript = this.breadFood.getComponent(KitchenBread);
       if (kitchenBreadScript) {
         kitchenBreadScript.handNode.active = false;

@@ -27,6 +27,7 @@ export class ScanPlates extends Component {
             break
         }
     }
+     console.log({result1: result})
     return result
   }
 }

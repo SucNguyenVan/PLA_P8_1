@@ -13,6 +13,8 @@ import {
   Node,
 } from "cc";
 import { ScanPlates } from "./ScanPlates";
+import { ScanBreadOvens } from "./ScanBreadOvens";
+import { ScanBreadFood } from "./ScanBreadFood";
 const { ccclass, property } = _decorator;
 
 @ccclass("InactivityWatcher")
@@ -41,6 +43,18 @@ export class InactivityWatcher extends Component {
     tooltip: "",
   })
   scanPlatesScript: ScanPlates;
+
+  @property({
+    type: ScanBreadOvens,
+    tooltip: "",
+  })
+  scanBreadOvensScript: ScanBreadOvens;
+
+  @property({
+    type: ScanBreadFood,
+    tooltip: "",
+  })
+  scanBreadFoodScript: ScanBreadFood;
 
   private _scheduled = false;
 
@@ -125,5 +139,13 @@ export class InactivityWatcher extends Component {
     // if (this.autoRepeat) this.resetTimer();
     console.log("le xing");
     if (this.scanPlatesScript && this.scanPlatesScript?.scanPlates()) return;
+    console.log("vao 1");
+    if (
+      this.scanBreadOvensScript &&
+      this.scanBreadOvensScript?.scanBreadOvens()
+    )
+      return;
+    console.log("vao 2");
+    this.scanBreadFoodScript?.scanBreadFood();
   };
 }

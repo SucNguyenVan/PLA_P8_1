@@ -49,11 +49,17 @@ export class BreadOven extends Component {
   @property({ type: Node, tooltip: "Tay hướng dẫn" })
   handNode: Node | null = null;
 
+    @property({
+    type: Boolean,
+    tooltip: "",
+  })
+  isFirstBreadOven = false;
+
   isPressedFirst = false;
 
   // ---- State nội bộ
-  private _status: FoodStatus = FoodStatus.Idle;
-  private _runId = 0; // token vô hiệu hoá các callback đã schedule
+  _status: FoodStatus = FoodStatus.Idle;
+  _runId = 0; // token vô hiệu hoá các callback đã schedule
 
   protected start(): void {
     if (this.handNode) {
@@ -139,7 +145,7 @@ export class BreadOven extends Component {
     this.scheduleOnce(() => {
       if (this._runId !== id) return;
       if (this._status !== FoodStatus.Lv1) return;
-      if (this.handNode && !this.isPressedFirst) {
+      if (this.handNode && !this.isPressedFirst && this.isFirstBreadOven) {
         this.handNode.active = true;
       }
       this.setBreadStatus(FoodStatus.Lv2, true); // loop để giữ trạng thái cho tới khi cháy
