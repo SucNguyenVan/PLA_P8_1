@@ -57,6 +57,7 @@ export class Character extends Component {
     this.scheduleOnce(()=>{
       this.moveToNode(this.destination);
     }, this.delayTime)
+    this.onSetTimeOutCallback()
   }
 
   update(dt: number) {
@@ -215,5 +216,14 @@ export class Character extends Component {
   onDisable() {
     // nếu node bị tắt giữa chừng, kết thúc chuyển động và không resolve promise
     this._moving = false;
+  }
+
+  onSetTimeOutCallback(){
+    const itemsControllerScript = this.items.getComponent(ItemsController);
+      if(itemsControllerScript){
+        itemsControllerScript.setTimeOutCallback(()=>{
+          this.playAnim("frustrating", true)
+        })
+      }
   }
 }

@@ -63,4 +63,11 @@ export class ItemsController extends Component {
       TripleHealthBarScript.startCountdown()
     }
   }
+
+  setTimeOutCallback(cb: (() => void) | null){
+    const TripleHealthBarScript = this.timeBar.getComponent(TripleHealthBar)
+    if(TripleHealthBarScript){
+      TripleHealthBarScript.setOnFinished(cb)
+    }
+  }
 }
