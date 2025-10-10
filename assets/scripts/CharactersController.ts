@@ -1,6 +1,7 @@
 import { _decorator, Component, Node } from "cc";
 import { Character } from "./Character";
 import { PlateType } from "./Enum";
+import { InactivityWatcher } from "./InactivityWatcher";
 const { ccclass, property } = _decorator;
 
 @ccclass("CharactersController")
@@ -16,6 +17,12 @@ export class CharactersController extends Component {
     tooltip: "all characters",
   })
   downloadNode: Node;
+
+  @property({
+    type: InactivityWatcher,
+    tooltip: "",
+  })
+  inactivityWatcher: InactivityWatcher;
   start() {
     this.downloadNode.active = false;
   }
@@ -34,6 +41,10 @@ export class CharactersController extends Component {
           if (this.charactersArr.every((lx) => lx.isCompleteAllItems)) {
             this.scheduleOnce(() => {
               this.downloadNode.active = true;
+              if(this.inactivityWatcher){
+                // this.inactivityWatcher.clearTimer()
+                this.inactivityWatcher?.scanOffAll()
+              }
             }, 2);
           }
         }

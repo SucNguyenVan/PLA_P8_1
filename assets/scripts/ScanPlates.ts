@@ -30,4 +30,10 @@ export class ScanPlates extends Component {
      console.log({result1: result})
     return result
   }
+
+    scanOffPlates(){
+    for(let plate of this.platesArr){
+        plate.handNode.active = false
+    }
+  }
 }

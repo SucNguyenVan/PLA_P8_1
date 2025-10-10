@@ -29,4 +29,10 @@ export class ScanBreadOvens extends Component {
     console.log({result2: result})
     return result;
   }
+
+  scanOffBreadOvens() {
+    for (let breadOven of this.breadOvensArr) {
+      breadOven.handNode.active = false
+    }
+  }
 }

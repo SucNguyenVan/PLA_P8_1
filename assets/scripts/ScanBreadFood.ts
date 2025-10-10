@@ -19,4 +19,8 @@ export class ScanBreadFood extends Component {
       this.breadFoodScript.handNode.active = true;
     }
   }
+
+  scanOffBreadFood() {
+    this.breadFoodScript.handNode.active = false
+  }
 }

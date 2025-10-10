@@ -56,7 +56,9 @@ export class InactivityWatcher extends Component {
   })
   scanBreadFoodScript: ScanBreadFood;
 
-  private _scheduled = false;
+  _scheduled = false;
+
+  isCanScan = true
 
   onEnable() {
     input.on(Input.EventType.TOUCH_START, this.onAnyInput, this);
@@ -92,28 +94,28 @@ export class InactivityWatcher extends Component {
     game.off(Game.EVENT_SHOW, this.onAppShow, this);
   }
 
-  private onAnyInput(_e: EventTouch | EventMouse | EventKeyboard) {
+  onAnyInput(_e: EventTouch | EventMouse | EventKeyboard) {
     // Có thao tác -> tắt hint nếu đang bật và reset timer
     if (this.hintNode) this.hintNode.active = false;
     this.resetTimer();
   }
 
-  private onAppHide() {
+  onAppHide() {
     this.clearTimer();
   }
 
-  private onAppShow() {
+  onAppShow() {
     this.resetTimer();
   }
 
-  private clearTimer() {
+  clearTimer() {
     if (this._scheduled) {
       this.unschedule(this.triggerIdle);
       this._scheduled = false;
     }
   }
 
-  private resetTimer() {
+  resetTimer() {
     this.clearTimer();
     if (this.idleSeconds <= 0) return;
     this.scheduleOnce(this.triggerIdle, this.idleSeconds);
@@ -121,7 +123,7 @@ export class InactivityWatcher extends Component {
   }
 
   /** <<< Đây là nơi chạy logic sau 5s không thao tác >>> */
-  private triggerIdle = () => {
+  triggerIdle = () => {
     // this._scheduled = false;
 
     // // 1) Gọi các handler đã cấu hình trong Inspector
@@ -138,6 +140,7 @@ export class InactivityWatcher extends Component {
     // // 4) (Nếu cần) tiếp tục đếm lại
     // if (this.autoRepeat) this.resetTimer();
     console.log("le xing");
+    if(!this.isCanScan) return
     if (this.scanPlatesScript && this.scanPlatesScript?.scanPlates()) return;
     console.log("vao 1");
     if (
@@ -148,4 +151,11 @@ export class InactivityWatcher extends Component {
     console.log("vao 2");
     this.scanBreadFoodScript?.scanBreadFood();
   };
+
+  scanOffAll(){
+    this.isCanScan = false
+    this.scanPlatesScript && this.scanPlatesScript?.scanOffPlates()
+    this.scanBreadOvensScript && this.scanBreadOvensScript?.scanOffBreadOvens()
+    this.scanBreadFoodScript?.scanOffBreadFood();
+  }
 }
