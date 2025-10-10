@@ -43,7 +43,7 @@ export class SimpleDownloadOverlay extends Component {
   iosUrl: string = 'https://apps.apple.com/us/app/cooking-marina-cooking-games/id1488429989';
 
   // --- Cờ theo SDK/quảng cáo ---
-  mindworks = false;
+  mindworks = true;
 
   @property({ tooltip: 'Bấm Download xong thì ẩn overlay' })
   autoHideOnClick: boolean = true;
